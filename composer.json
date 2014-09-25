@@ -1,0 +1,20 @@
+{
+    "name": "andradedev/cfdi32",
+    "description": "",
+    "authors": [
+        {
+            "name": "Jorge Andrade",
+            "email": "j.andrade.dev@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "illuminate/support": "4.2.*"
+    },
+    "autoload": {
+        "psr-0": {
+            "Andradedev\\Cfdi32": "src/"
+        }
+    },
+    "minimum-stability": "stable"
+}
