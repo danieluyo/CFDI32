@@ -12,7 +12,7 @@ class Cfdi32{
 	}
 
 	public static function createXml($gen, $emi, $rec, $conc, $imp, $tipo, $comp = null) {
-		$this->setGenerales($gen[1], $gen[0], $tipo);
+		$this->setGenerales($gen, $tipo);
 		$this->setEmisor($emi);
 		$this->setReceptor($rec);
 		$this->setConceptos($conc);
@@ -22,7 +22,7 @@ class Cfdi32{
 		}
 	}
 
-	public function setGenerales($gen, $certificado, $tipo) {
+	public function setGenerales($gen, $tipo) {
 		$this->root = $this->xml->createElement("cfdi:Comprobante");
 		$this->root = $this->xml->appendChild($this->root);
 
@@ -30,17 +30,17 @@ class Cfdi32{
 		 
 		$this->setAttr($this->root, [
 			"version" 			=>"3.2",
-			"serie"             =>$gen[0],
-			"folio"             =>$gen[1],
-			"fecha"             =>$gen[2],
-			"formaDePago"       =>"PAGO EN UNA SOLA EXHIBICION",
-			"noCertificado"     =>$certificado,
-			"subTotal"          =>$gen[3],
-			"descuento"         =>$gen[4],
-			"total"             =>$gen[5],
-			"tipoDeComprobante" =>$gen[7],
-			"metodoDePago"      =>$gen[6],
-			"LugarExpedicion"   =>"Merida, yucatan"
+			"serie"             =>$gen['serie'],
+			"folio"             =>$gen['folio'],
+			"fecha"             =>$gen['fecha'],
+			"formaDePago"       =>$gen['formaDePago']?:"PAGO EN UNA SOLA EXHIBICION",
+			"noCertificado"     =>$gen['noCertificado'],
+			"subTotal"          =>$gen['subTotal'],
+			"descuento"         =>$gen['descuento'],
+			"total"             =>$gen['total'],
+			"tipoDeComprobante" =>$gen['tipoDeComprobante'],
+			"metodoDePago"      =>$gen['metodoDePago'],
+			"LugarExpedicion"   =>$gen['LugarExpedicion']?:"Merida, yucatan"
        ]);
 	}
 
@@ -66,35 +66,35 @@ class Cfdi32{
 		$emisor = $this->root->appendChild($emisor);
 
 		$this->setAttr($emisor, [
-			"rfc"    =>$emi[0],
-			"nombre" =>$emi[1]
+			"rfc"    =>$emi['rfc'],
+			"nombre" =>$emi['nombre']
        	]);
 
 		$domfis = $this->xml->createElement("cfdi:DomicilioFiscal");
 		$domfis = $emisor->appendChild($domfis);
 		$this->setAttr($domfis, [
-			"calle"        =>$emi[2],
-			"noExterior"   =>$emi[3],
-			"noInterior"   =>$emi[4],
-			"colonia"      =>$emi[5],
-			"municipio"    =>$emi[6],
-			"estado"       =>$emi[7],
-			"pais"         =>$emi[8],
-			"codigoPostal" =>$emi[9]
+			"calle"        =>$emi['calle'],
+			"noExterior"   =>$emi['noExterior'],
+			"noInterior"   =>$emi['noInterior'],
+			"colonia"      =>$emi['colonia'],
+			"municipio"    =>$emi['municipio'],
+			"estado"       =>$emi['estado'],
+			"pais"         =>$emi['pais'],
+			"codigoPostal" =>$emi['codigoPostal']
        	]);
 		$expedidoen = $this->xml->createElement("cfdi:ExpedidoEn");
 		$expedidoen = $emisor->appendChild($expedidoen);
 
 		$this->setAttr($expedidoen, [
-			"calle"        =>$emi[2],
-			"noExterior"   =>$emi[3],
-			"noInterior"   =>$emi[4],
-			"colonia"      =>$emi[5],
-			"localidad"    =>$emi[6],
-			"municipio"    =>$emi[6],
-			"estado"       =>$emi[7],
-			"pais"         =>$emi[8],
-			"codigoPostal" =>$emi[9]
+			"calle"        =>$emi['calle'],
+			"noExterior"   =>$emi['noExterior'],
+			"noInterior"   =>$emi['noInterior'],
+			"colonia"      =>$emi['colonia'],
+			"localidad"    =>$emi['localidad'],
+			"municipio"    =>$emi['municipio'],
+			"estado"       =>$emi['estado'],
+			"pais"         =>$emi['pais'],
+			"codigoPostal" =>$emi['codigoPostal']
        	]);
 
 		$regimen = $this->xml->createElement("cfdi:RegimenFiscal");
@@ -106,21 +106,21 @@ class Cfdi32{
 		$receptor = $this->xml->createElement("cfdi:Receptor");
 		$receptor = $this->root->appendChild($receptor);
 		$this->setAttr($receptor, [
-				"rfc"    => $rec[0],
-				"nombre" => $rec[1]
+				"rfc"    => $rec["rfc"],
+				"nombre" => $rec["nombre"]
           	]);
 
 		$domicilio = $this->xml->createElement("cfdi:Domicilio");
 		$domicilio = $receptor->appendChild($domicilio);
 		$this->setAttr($domicilio, [
-				"calle"        => $rec[2],
-				"noExterior"   => $rec[3],
-				"noInterior"   => $rec[4],
-				"colonia"      => $rec[5],
-				"municipio"    => $rec[6],
-				"estado"       => $rec[7],
-				"pais"         => $rec[8],
-				"codigoPostal" => $rec[9]
+				"calle"        => $rec["calle"],
+				"noExterior"   => $rec["noExterior"],
+				"noInterior"   => $rec["noInterior"],
+				"colonia"      => $rec["colonia"],
+				"municipio"    => $rec["municipio"],
+				"estado"       => $rec["estado"],
+				"pais"         => $rec["pais"],
+				"codigoPostal" => $rec["codigoPostal"]
 			]);
 	}
 
