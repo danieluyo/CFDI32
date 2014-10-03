@@ -11,7 +11,7 @@ class Cfdi32{
 		$this->xml = new DOMdocument("1.0","UTF-8");
 	}
 
-	public static function createXml($gen, $emi, $rec, $conc, $imp, $tipo, $comp = null) {
+	public static function create($gen, $emi, $rec, $conc, $imp, $tipo, $comp = null) {
 		$this->setGenerales($gen, $tipo);
 		$this->setEmisor($emi);
 		$this->setReceptor($rec);
@@ -20,6 +20,9 @@ class Cfdi32{
 		if ($comp !== null) {
 			$this->setComplementos($comp);
 		}
+
+		$this->setCadenaOriginal();
+		return $this;
 	}
 
 	public function setGenerales($gen, $tipo) {
@@ -75,7 +78,7 @@ class Cfdi32{
 		$this->setAttr($domfis, [
 			"calle"        =>$emi['calle'],
 			"noExterior"   =>$emi['noExterior'],
-			"noInterior"   =>$emi['noInterior'],
+			"noInterior"   =>$emi['noInterior']?:"",
 			"colonia"      =>$emi['colonia'],
 			"municipio"    =>$emi['municipio'],
 			"estado"       =>$emi['estado'],
@@ -88,7 +91,7 @@ class Cfdi32{
 		$this->setAttr($expedidoen, [
 			"calle"        =>$emi['calle'],
 			"noExterior"   =>$emi['noExterior'],
-			"noInterior"   =>$emi['noInterior'],
+			"noInterior"   =>$emi['noInterior']?:"",
 			"colonia"      =>$emi['colonia'],
 			"localidad"    =>$emi['localidad'],
 			"municipio"    =>$emi['municipio'],
@@ -99,7 +102,7 @@ class Cfdi32{
 
 		$regimen = $this->xml->createElement("cfdi:RegimenFiscal");
 		$expedido = $emisor->appendChild($regimen);
-		$this->setAttr($regimen, ["Regimen"=>$emi[10]]);
+		$this->setAttr($regimen, ["Regimen"=>$emi["regimen"]]);
 	}
 
 	public function setReceptor($rec) {
@@ -115,7 +118,7 @@ class Cfdi32{
 		$this->setAttr($domicilio, [
 				"calle"        => $rec["calle"],
 				"noExterior"   => $rec["noExterior"],
-				"noInterior"   => $rec["noInterior"],
+				"noInterior"   => $rec["noInterior"]?:"",
 				"colonia"      => $rec["colonia"],
 				"municipio"    => $rec["municipio"],
 				"estado"       => $rec["estado"],
@@ -264,21 +267,32 @@ class Cfdi32{
 		$this->setAttr($nomina, $comp["attr"]);
 	}
 
-	public function getCadenaOriginal($xml = null) {
+	public function setCadenaOriginal() {
 		$xsl = new DOMDocument;
 		$xsl->load(\Config::get("cfdi32::config.xslt"));
+
 		$proc = new XSLTProcessor;
 		$proc->importStyleSheet($xsl);
-		$this->cadena_original = $proc->transformToXML($this->xml->saveXML());
+
+		$this->cadena_original = $proc->transformToXML($this->getXML());
+
+		return $this;
 	}
 
-	public function setSello($cadena_original) {
+	public function getCadenaOriginal()() 
+	{
+		return $this->cadena_original;
+	}
+
+	public function setSello() {
 		$pkeyid = openssl_get_privatekey(file_get_contents(\Config::get("cfdi32::config.key")));
+
 		openssl_sign($this->cadena_original, $crypttext, $pkeyid, OPENSSL_ALGO_SHA1);
+		
 		openssl_free_key($pkeyid);
 		 
-		$sello = base64_encode($crypttext);      
-		$this->root->setAttribute("sello",$sello);
+		$this->sello = base64_encode($crypttext);      
+		$this->root->setAttribute("sello",$this->sello);
 
 		$datos = file(\Config::get("cfdi32::config.cer"));
 		$certificado = ""; $carga=false;
@@ -289,12 +303,18 @@ class Cfdi32{
 		}
 
 		$this->root->setAttribute("certificado",$certificado);
+
+		return $this;
+	}
+
+	public function getSello() 
+	{
+		return $this->sello;
 	}
 
 	public function getXML() {
 		$this->xml->formatOutput = true;
 		$todo = $this->xml->saveXML();
-		$paso = $todo;
 		return $todo;
 	}
 
@@ -307,7 +327,10 @@ class Cfdi32{
 
 		$save = $this->xml->save(app_path("cfdi/xml/{$name}.xml"));
 		
-		return $save;
+		if ( ! $save) {
+			throw new Exception("Ocurrio un error al guardar.", 1);
+		}
+		
 	}
 
 	// {{{ Funcion que carga los atributos a la etiqueta XML
