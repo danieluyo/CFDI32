@@ -279,7 +279,7 @@ class Cfdi32{
 		return $this;
 	}
 
-	public function getCadenaOriginal()() 
+	public function getCadenaOriginal()
 	{
 		return $this->cadena_original;
 	}
